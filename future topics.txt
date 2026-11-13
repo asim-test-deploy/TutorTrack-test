@@ -1,0 +1,3 @@
+string indexing 
+
+7. Reverse a number mathematically
