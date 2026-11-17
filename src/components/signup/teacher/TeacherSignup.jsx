@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Button from "../../ui/Button.jsx";
 import SelectField from "../../ui/SelectField.jsx";
 
@@ -14,13 +15,41 @@ export default function TeacherBasicDetails({
   onBack,
   onContinue,
 }) {
+  const [invalidFields, setInvalidFields] = useState([]);
+
+  const handleChange = (event) => {
+    const { name } = event.target;
+    setInvalidFields((currentFields) =>
+      currentFields.filter((fieldName) => fieldName !== name),
+    );
+    onChange(event);
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
+
+    const form = event.currentTarget;
+    if (!form.checkValidity()) {
+      setInvalidFields(
+        Array.from(form.elements)
+          .filter((field) => field.willValidate && !field.validity.valid)
+          .map((field) => field.name),
+      );
+      return;
+    }
+
+    setInvalidFields([]);
     onContinue();
   };
 
   const inputClasses =
-    "mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100";
+    "mt-2 w-full rounded-xl border px-4 py-3 text-slate-800 outline-none transition placeholder:text-slate-400 focus:ring-4";
+  const fieldClasses = (name) =>
+    `${inputClasses} ${
+      invalidFields.includes(name)
+        ? "border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-100"
+        : "border-slate-200 bg-white focus:border-indigo-500 focus:ring-indigo-100"
+    }`;
 
   return (
     <section
@@ -41,6 +70,7 @@ export default function TeacherBasicDetails({
 
       <form
         onSubmit={handleSubmit}
+        noValidate
         className="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
       >
         <div>
@@ -49,6 +79,9 @@ export default function TeacherBasicDetails({
             className="block text-sm font-medium text-slate-700"
           >
             Full name
+            <span className="ml-1 text-red-600" aria-hidden="true">
+              *
+            </span>
           </label>
           <input
             id="teacher-name"
@@ -56,11 +89,12 @@ export default function TeacherBasicDetails({
             name="name"
             autoComplete="name"
             value={formData.name}
-            onChange={onChange}
+            onChange={handleChange}
             placeholder="Enter your full name"
             pattern=".*\S.*"
             title="Enter your full name."
-            className={inputClasses}
+            aria-invalid={invalidFields.includes("name")}
+            className={fieldClasses("name")}
             required
           />
         </div>
@@ -71,18 +105,22 @@ export default function TeacherBasicDetails({
             className="block text-sm font-medium text-slate-700"
           >
             Age
+            <span className="ml-1 text-red-600" aria-hidden="true">
+              *
+            </span>
           </label>
           <input
             id="teacher-age"
             type="number"
             name="age"
             value={formData.age}
-            onChange={onChange}
+            onChange={handleChange}
             placeholder="Enter your age"
             min="18"
             max="100"
             step="1"
-            className={inputClasses}
+            aria-invalid={invalidFields.includes("age")}
+            className={fieldClasses("age")}
             required
           />
         </div>
@@ -92,9 +130,10 @@ export default function TeacherBasicDetails({
           name="gender"
           label="Gender"
           value={formData.gender}
-          onChange={onChange}
+          onChange={handleChange}
           placeholder="Select your gender"
           options={genders}
+          invalid={invalidFields.includes("gender")}
         />
 
         <div className="flex gap-3 pt-3">

@@ -10,8 +10,13 @@ export default function AccountDetails({
   onContinue,
 }) {
   const [passwordError, setPasswordError] = useState("");
+  const [invalidFields, setInvalidFields] = useState([]);
 
   const handleChange = (event) => {
+    const { name } = event.target;
+    setInvalidFields((currentFields) =>
+      currentFields.filter((fieldName) => fieldName !== name),
+    );
     setPasswordError("");
     onChange(event);
   };
@@ -19,17 +24,35 @@ export default function AccountDetails({
   const handleSubmit = (event) => {
     event.preventDefault();
 
+    const form = event.currentTarget;
+    if (!form.checkValidity()) {
+      setInvalidFields(
+        Array.from(form.elements)
+          .filter((field) => field.willValidate && !field.validity.valid)
+          .map((field) => field.name),
+      );
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
+      setInvalidFields(["confirmPassword"]);
       setPasswordError("Those passwords don’t match. Please try again.");
       return;
     }
 
+    setInvalidFields([]);
     setPasswordError("");
     onContinue();
   };
 
   const inputClasses =
-    "mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100";
+    "mt-2 w-full rounded-xl border px-4 py-3 text-slate-800 outline-none transition placeholder:text-slate-400 focus:ring-4";
+  const fieldClasses = (name) =>
+    `${inputClasses} ${
+      invalidFields.includes(name)
+        ? "border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-100"
+        : "border-slate-200 bg-white focus:border-indigo-500 focus:ring-indigo-100"
+    }`;
 
   return (
     <section
@@ -51,6 +74,7 @@ export default function AccountDetails({
 
       <form
         onSubmit={handleSubmit}
+        noValidate
         className="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
       >
         {/* Email */}
@@ -60,6 +84,9 @@ export default function AccountDetails({
             className="block text-sm font-medium text-slate-700"
           >
             Email address
+            <span className="ml-1 text-red-600" aria-hidden="true">
+              *
+            </span>
           </label>
 
           <input
@@ -70,7 +97,8 @@ export default function AccountDetails({
             value={formData.email}
             onChange={handleChange}
             placeholder="Enter your email address"
-            className={inputClasses}
+            aria-invalid={invalidFields.includes("email")}
+            className={fieldClasses("email")}
             required
           />
         </div>
@@ -86,6 +114,7 @@ export default function AccountDetails({
             placeholder="Create a password"
             minLength={8}
             required
+            invalid={invalidFields.includes("password")}
           />
           <p className="mt-2 text-xs text-slate-500">
             Use at least 8 characters.
@@ -102,7 +131,11 @@ export default function AccountDetails({
           placeholder="Re-enter your password"
           minLength={8}
           required
-          aria-invalid={Boolean(passwordError)}
+          invalid={invalidFields.includes("confirmPassword")}
+          aria-invalid={
+            Boolean(passwordError) ||
+            invalidFields.includes("confirmPassword")
+          }
           aria-describedby={
             passwordError ? "confirm-password-error" : undefined
           }

@@ -10,6 +10,7 @@ export default function PasswordField({
   minLength,
   value,
   onChange,
+  invalid = false,
   'aria-invalid': ariaInvalid,
   'aria-describedby': ariaDescribedBy,
 }) {
@@ -19,8 +20,19 @@ export default function PasswordField({
     <div>
       <label htmlFor={id} className="mb-2 block text-sm font-medium text-slate-700">
         {label}
+        {required && (
+          <span className="ml-1 text-red-600" aria-hidden="true">
+            *
+          </span>
+        )}
       </label>
-      <div className="flex items-center overflow-hidden rounded-xl border border-slate-200 bg-white transition focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-100">
+      <div
+        className={`flex items-center overflow-hidden rounded-xl border transition focus-within:ring-4 ${
+          invalid
+            ? 'border-red-500 bg-red-50 focus-within:border-red-500 focus-within:ring-red-100'
+            : 'border-slate-200 bg-white focus-within:border-indigo-500 focus-within:ring-indigo-100'
+        }`}
+      >
         <input
           id={id}
           name={name}
@@ -31,7 +43,7 @@ export default function PasswordField({
           minLength={minLength}
           value={value}
           onChange={onChange}
-          aria-invalid={ariaInvalid}
+          aria-invalid={ariaInvalid ?? invalid}
           aria-describedby={ariaDescribedBy}
           className="min-w-0 flex-1 bg-transparent px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400"
         />

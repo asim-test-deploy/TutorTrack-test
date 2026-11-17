@@ -11,15 +11,30 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [invalidFields, setInvalidFields] = useState([]);
+
+  const handleFieldChange = (event, setValue) => {
+    const { name, value } = event.target;
+    setInvalidFields((currentFields) =>
+      currentFields.filter((fieldName) => fieldName !== name),
+    );
+    setValue(value);
+  };
 
   async function handleLogin(event) {
     event.preventDefault();
     const form = event.currentTarget;
 
-    if (!form.reportValidity()) {
+    if (!form.checkValidity()) {
+      setInvalidFields(
+        Array.from(form.elements)
+          .filter((field) => field.willValidate && !field.validity.valid)
+          .map((field) => field.name),
+      );
       return;
     }
 
+    setInvalidFields([]);
     setIsSubmitting(true);
     setSubmitError("");
 
@@ -60,7 +75,7 @@ export default function Login() {
             Login successful.
           </div>
         ) : (
-          <form className="space-y-5" onSubmit={handleLogin}>
+          <form className="space-y-5" onSubmit={handleLogin} noValidate>
             <div className="text-sm font-medium text-slate-700">
               <InputFeild
                 id="email"
@@ -70,7 +85,8 @@ export default function Login() {
                 placeholder="you@example.com"
                 required
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                invalid={invalidFields.includes("email")}
+                onChange={(event) => handleFieldChange(event, setEmail)}
                 className="font-normal text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
               />
             </div>
@@ -83,7 +99,8 @@ export default function Login() {
               required
               autoComplete="current-password"
               value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              invalid={invalidFields.includes("password")}
+              onChange={(event) => handleFieldChange(event, setPassword)}
             />
 
             {submitError && (

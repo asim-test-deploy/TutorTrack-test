@@ -1,5 +1,9 @@
 export default function SignupSuccess({ accountType = "teacher" }) {
   const journey = accountType === "teacher" ? "teaching" : "learning";
+  const successMessage =
+    accountType === "student"
+      ? "Your student account is ready. Start exploring TutorTrack and make the most of your learning journey."
+      : `Your ${accountType} account is ready. We’re so glad to have you with us on your ${journey} journey.`;
 
   return (
     <section
@@ -30,11 +34,12 @@ export default function SignupSuccess({ accountType = "teacher" }) {
         You&apos;re all set!
       </h2>
       <p className="mx-auto mt-3 max-w-md text-base leading-7 text-slate-600">
-        Your {accountType} account is ready. We&apos;re so glad to have you with
-        us on your {journey} journey.
+        {successMessage}
       </p>
       <p className="mt-6 rounded-xl bg-indigo-50 px-4 py-3 text-sm font-medium text-indigo-800">
-        You&apos;re officially enrolled in TutorTrack.
+        {accountType === "student"
+          ? "Your learning journey starts here."
+          : "You’re officially enrolled in TutorTrack."}
       </p>
     </section>
   );

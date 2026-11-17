@@ -9,6 +9,7 @@ export default function SelectField({
   placeholder,
   options,
   required = true,
+  invalid = false,
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
@@ -87,6 +88,11 @@ export default function SelectField({
         className="block text-sm font-medium text-slate-700"
       >
         {label}
+        {required && (
+          <span className="ml-1 text-red-600" aria-hidden="true">
+            *
+          </span>
+        )}
       </label>
       <div className="relative mt-2">
         <input
@@ -114,8 +120,13 @@ export default function SelectField({
             isOpen && activeOption ? `${id}-option-${activeIndex}` : undefined
           }
           aria-required={required}
+          aria-invalid={invalid}
           required={required}
-          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-11 text-slate-800 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+          className={`w-full rounded-xl border px-4 py-3 pr-11 text-slate-800 outline-none transition focus:ring-4 ${
+            invalid
+              ? "border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-100"
+              : "border-slate-200 bg-white focus:border-indigo-500 focus:ring-indigo-100"
+          }`}
         />
         <svg
           aria-hidden="true"
